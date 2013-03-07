@@ -5,6 +5,8 @@
 #include <string.h>
 #include <util/crc16.h>
 
+//class definition
+
 class RTTY {  
 public:
   RTTY(uint8_t pin, uint8_t led_pin);

@@ -7,6 +7,7 @@ uint8_t UNO::get_bufsize() {
   return BUFSIZE;
 }
 
+//Found this from "http://code.google.com/p/tinkerit/wiki/SecretVoltmeter"
 float UNO::get_voltage() {
   long result;
   // Read 1.1V reference against AVcc

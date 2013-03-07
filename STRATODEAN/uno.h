@@ -5,6 +5,8 @@
 
 #define BUFSIZE 16
 
+//class definition
+
 class UNO {
   public:
     UNO(void);

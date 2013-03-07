@@ -1,9 +1,12 @@
+//class definition for the GPS functions
 #ifndef GPS_H
 #define GPS_H
 
 #include <Arduino.h>
 
 #define BUFSIZE 128
+
+//class definition
 
 class GPS: 
 public SoftwareSerial {

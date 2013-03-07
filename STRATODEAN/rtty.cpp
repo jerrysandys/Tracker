@@ -3,6 +3,7 @@
 uint8_t _pin = 0;
 uint8_t _led_pin = 0;
 
+//Setting our pin assignments
 RTTY::RTTY(uint8_t pin, uint8_t led_pin) {
   pinMode(pin, OUTPUT);
   pinMode(_led_pin, OUTPUT);
@@ -10,16 +11,20 @@ RTTY::RTTY(uint8_t pin, uint8_t led_pin) {
   _led_pin = led_pin;
 }
 
+//Method to send data string
 void RTTY::send(char *data) {
 
   char c;
   char chksum_str[6];
-
+  
+  //Call checksum routine
   unsigned int CHECKSUM = crc16_chksum(data);
   sprintf(chksum_str, "*%04X\n", CHECKSUM);
+  //Concatinate data with checksum
   strcat(data, chksum_str);
-
+  
   c = *data++;
+  //While we haven't reached the end of the data string, keep sending bytes
   while (c != '\0') {
     send_byte(c);
     c = *data++;
@@ -63,6 +68,7 @@ void RTTY::send_bit(uint8_t bit) {
   digitalWrite(_led_pin, LOW);
 }
 
+//Checksum routine
 uint16_t RTTY::crc16_chksum(char *str) 
 {
   size_t i;
