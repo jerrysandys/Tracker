@@ -16,13 +16,13 @@ void RTTY::send(char *data) {
 
   char c;
   char chksum_str[6];
-  
+
   //Call checksum routine
   unsigned int CHECKSUM = crc16_chksum(data);
   sprintf(chksum_str, "*%04X\n", CHECKSUM);
   //Concatinate data with checksum
   strcat(data, chksum_str);
-  
+
   c = *data++;
   //While we haven't reached the end of the data string, keep sending bytes
   while (c != '\0') {
@@ -50,14 +50,15 @@ void RTTY::send_byte(char c) {
 }
 
 void RTTY::send_bit(uint8_t bit) {
-  digitalWrite(_led_pin, HIGH);
   if (bit) {
     // high
     digitalWrite(_pin, HIGH);
+    digitalWrite(_led_pin, HIGH);
   } 
   else {
     // low
     digitalWrite(_pin, LOW);
+    digitalWrite(_led_pin, LOW);
   }
 
   //delayMicroseconds(3333); // 300 baud
@@ -85,4 +86,5 @@ uint16_t RTTY::crc16_chksum(char *str)
   }
   return crc;
 }
+
 

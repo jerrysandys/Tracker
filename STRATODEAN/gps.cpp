@@ -15,7 +15,8 @@ unsigned long gps_fix_age;
 uint8_t led_pin = 0;
 
 //Class instantisation with pin assignments
-GPS::GPS(uint8_t rx_pin, uint8_t tx_pin, uint8_t _pin):SoftwareSerial(rx_pin, tx_pin) {
+GPS::GPS(uint8_t rx_pin, uint8_t tx_pin, uint8_t _pin):
+SoftwareSerial(rx_pin, tx_pin) {
   pinMode(rx_pin, INPUT);
   pinMode(tx_pin, OUTPUT);
   pinMode(_pin, OUTPUT);
@@ -39,12 +40,12 @@ void GPS::start() {
   println(F("$PUBX,40,VTG,0,0,0,0*5E"));
   println(F("$PUBX,40,ZDA,0,0,0,0*44"));
 
-  delay(2000); // Wait for the GPS to process all commands
+  delay(2500); // Wait for the GPS to process all commands
 
   //Set the navigation mode to flight mode
   //This is important - we don't want it dropping out at 18km or similar!
   uint8_t set_nav5[] = { 
-    0xB5, 0x62, 0x06, 0x24, 0x24, 0x00, 0xFF, 0xFF, 0x06, 0x03, 0x00, 0x00, 0x00, 0x00, 0x10, 0x27, 0x00, 0x00, 0x05, 0x00, 0xFA, 0x00, 0xFA, 0x00, 0x64, 0x00, 0x2C, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0xDC     };
+    0xB5, 0x62, 0x06, 0x24, 0x24, 0x00, 0xFF, 0xFF, 0x06, 0x03, 0x00, 0x00, 0x00, 0x00, 0x10, 0x27, 0x00, 0x00, 0x05, 0x00, 0xFA, 0x00, 0xFA, 0x00, 0x64, 0x00, 0x2C, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0xDC       };
   //send flight mode command
   send_ubx(set_nav5, sizeof(set_nav5)/sizeof(uint8_t));
 
@@ -66,8 +67,8 @@ char *GPS::get_info() {
   char strLongitude[20];
   char strAltitude[20];
   char strFix[3];
-  char strSpeed[20];
-  char strVSpeed[20];
+  //char strSpeed[20];
+  //char strVSpeed[20];
   char strSats[3];
   char strFixQuality[3];
   byte hasfix;
@@ -92,20 +93,20 @@ char *GPS::get_info() {
   //Longitude
   dtostrf(gps_lon/100000.0, 0, 5, strLongitude);
   //Serial.print("longitude: "); Serial.println(gps_lon/100000.0, 5);
-  
+
   //Altitude
   dtostrf(tgps.altitude()/100, 0, 0, strAltitude);
   //Serial.print("altitude: "); Serial.print(tgps.altitude()/100.0, 0); Serial.println(" m");
   //Serial.print("speed: "); Serial.print(gps.speed()/100.0, 0); Serial.println(" km/h");
-  
+
   //Vertical Speed
-  sprintf(strVSpeed, "%02d", tgps.vspeed());
+  //sprintf(strVSpeed, "%02d", tgps.vspeed());
   //Serial.print("vert. speed: "); Serial.print(tgps.vspeed(), DEC); Serial.println(" cm/s");
 
   //Satellites
   sprintf(strSats, "%d", tgps.sats());
   //Serial.print("satellites: "); Serial.println(tgps.sats(), DEC);
-  
+
   //Whether the GPS has a fix or no
   hasfix = tgps.has_fix();
   sprintf(strFix, "%d", hasfix);
@@ -133,7 +134,7 @@ char *GPS::get_info() {
   //Concatinating it into a string called 'info'
   snprintf(info, 9, "%s", strTime);
   strncat(info, ",", 1);
-  strncat(info, strLatitude, 20);
+  strncat(info, strLatitude, 20);  
   strncat(info, ",", 1);
   strncat(info, strLongitude, 20);
   strncat(info, ",", 1);
@@ -141,15 +142,10 @@ char *GPS::get_info() {
   strncat(info, ",", 1);
   strncat(info, strFixQuality, 3);
   strncat(info, ",", 1);
-  strncat(info, strFix, 3);
-  strncat(info, ",", 1);
-  strncat(info, strVSpeed, 20);
-  strncat(info, ",", 1);
   strncat(info, strSats, 3);
 
-
   //println(info);
-  
+
   //Returning the info string back to the loop
   return info;
 }
@@ -159,9 +155,9 @@ boolean GPS::poll() {
   //This is the special command that gets the information from the GPS
   //Send this to the GPS and wait for response
   println(F("$PUBX,00*33"));
-  delay(1200);
+  delay(1500);
   unsigned long starttime = millis();
-  
+
   //Continue to read from gps hardware port
   while (true) {
     if (available()) {
@@ -238,4 +234,5 @@ boolean GPS::get_ubx_ack(uint8_t *msg) {
     }
   }
 }
+
 
