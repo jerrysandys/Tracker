@@ -4,6 +4,7 @@
 //Notes:    Thanks goes to all the existing UKHAS enthusiasts who helped with providing example code for others to use.
 //          Thanks also to the guys on the UKHAS #highaltitude irc channel for their invaluable help.
 
+//Github test
 //We need SoftwareSerial port as we are using the hardware port for GPS
 #include <SoftwareSerial.h>
 //This is a modifed version of the TinyGPS libaray for UBlox GPS chips
