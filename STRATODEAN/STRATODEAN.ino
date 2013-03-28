@@ -52,7 +52,7 @@ void setup() {
 
   //Intialise our hardware serial port to talk to the GPS at 9600 baud. 
   Serial.begin(9600);
-  Serial.println(F("SDEAN Payload Tracker, initialising......"));
+  Serial.println(F("STRATODEAN Payload Tracker, initialising......"));
   //Check how much RAM we have
   Serial.println(freeRam());
 
