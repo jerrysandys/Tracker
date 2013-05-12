@@ -81,10 +81,7 @@ char *GPS::get_info() {
 
   //Create time string
   sprintf(strTime, "%02d:%02d:%02d", gps_hour, gps_minute, gps_second);
-
-  //Serial.println();
-  //Serial.print("time: "); Serial.println(strTime);
-
+  
   //uses the dtostrf function found in stdlib.h to convert floats to strings
   //Latitude
   dtostrf(gps_lat/100000.0, 0, 5, strLatitude);
@@ -98,10 +95,6 @@ char *GPS::get_info() {
   dtostrf(tgps.altitude()/100, 0, 0, strAltitude);
   //Serial.print("altitude: "); Serial.print(tgps.altitude()/100.0, 0); Serial.println(" m");
   //Serial.print("speed: "); Serial.print(gps.speed()/100.0, 0); Serial.println(" km/h");
-
-  //Vertical Speed
-  //sprintf(strVSpeed, "%02d", tgps.vspeed());
-  //Serial.print("vert. speed: "); Serial.print(tgps.vspeed(), DEC); Serial.println(" cm/s");
 
   //Satellites
   sprintf(strSats, "%d", tgps.sats());
