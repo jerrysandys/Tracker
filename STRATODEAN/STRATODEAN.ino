@@ -15,18 +15,24 @@
 #include "rtty.h"
 #include "gps.h"
 
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
 //Setup pins
 #define GPSRX 2
 #define GPSTX 6
 #define NTX2 3
 #define REDLED 4
 #define GREENLED 5
+#define TEMP 7
 //Character buffer for transmission
-#define DATASIZE 128
+#define DATASIZE 256
 char data[DATASIZE];
 //Character buffer for battery voltage
-#define BUFSIZE 16
+#define BUFSIZE 8
 char battery[BUFSIZE];
+char internalT[BUFSIZE];
+char externalT[BUFSIZE];
 //s_id as sentence id to have a unique number for each transmission
 uint16_t s_id = 0;
 //Select pin for SD card write
@@ -39,6 +45,12 @@ boolean sdWrite = true;
 RTTY rtty(NTX2, REDLED);
 GPS gps(GPSRX, GPSTX, GREENLED);
 SdFat sd;
+OneWire oneWire(TEMP);
+DallasTemperature sensors(&oneWire);
+
+DeviceAddress internalTemp = {0x28, 0xCC, 0x5C, 0x9D, 0x04, 0x00, 0x00, 0xAA};
+DeviceAddress externalTemp = {0x28, 0xAE, 0x2F, 0xAA, 0x04, 0x00, 0x00, 0xEA};
+
 //*************************************************************************************
 //
 //setup()
@@ -56,6 +68,10 @@ void setup() {
   Serial.println(F("STRATODEAN Payload Tracker, initialising......"));
   //Check how much RAM we have
   Serial.println(freeRam());
+
+  sensors.begin();
+  sensors.setResolution(internalTemp,10);
+  sensors.setResolution(externalTemp,10);
 
   //Light up both LEDs to indicate that we have a go situation!
   digitalWrite(GREENLED, HIGH);
@@ -93,13 +109,17 @@ void loop() {
   //Get battery voltage
   dtostrf(get_voltage()/1000,0,1, battery);
 
+  sensors.requestTemperatures();
+  dtostrf(sensors.getTempC(internalTemp),0,0,internalT);
+  dtostrf(sensors.getTempC(externalTemp),0,0,externalT);
+
   //How much ram do we have
   Serial.println(freeRam());  
 
   //$$callsign,sentence_id,time,latitude,longitude,altitude,fix,ascentrate,satellites,batteryvoltage*CHECKSUM\n
   
   //Call gps.get_info and, along with the s_id and battery, put it altogether into the string called 'data'
-  snprintf(data, DATASIZE, "$$SDEAN,%d,%s,%s", s_id, gps.get_info(), battery);
+  snprintf(data, DATASIZE, "$$SDEAN,%d,%s,%s,%s,%s", s_id, gps.get_info(), internalT, externalT, battery);
   //print this to the screen and the ram
   Serial.println(data);
   Serial.println(freeRam());
@@ -110,7 +130,7 @@ void loop() {
   Serial.println(freeRam());
   //increment the id next time.
   s_id++;
-  delay(500);
+  //delay(500);
 }
 
 //*************************************************************************************
