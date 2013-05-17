@@ -25,10 +25,10 @@
 #define GREENLED 5
 #define TEMP 7
 //Character buffer for transmission
-#define DATASIZE 192
+#define DATASIZE 128
 char data[DATASIZE];
 //Character buffer for battery voltage
-#define BUFSIZE 4
+#define BUFSIZE 16
 char battery[BUFSIZE];
 char internalT[BUFSIZE];
 char externalT[BUFSIZE];
@@ -112,8 +112,8 @@ void loop() {
   dtostrf(get_voltage()/1000,0,1, battery);
   //Get temperature
   sensors.requestTemperatures();
-  dtostrf(sensors.getTempC(internalTemp),0,0,internalT);
-  dtostrf(sensors.getTempC(externalTemp),0,0,externalT);
+  dtostrf(sensors.getTempC(internalTemp),0,2,internalT);
+  dtostrf(sensors.getTempC(externalTemp),0,2,externalT);
 
   //How much ram do we have
   Serial.println(freeRam());  
@@ -122,7 +122,6 @@ void loop() {
   
   //Call gps.get_info and, along with the s_id and battery, put it altogether into the string called 'data'
   snprintf(data, DATASIZE, "$$SDEAN,%d,%s,%s,%s,%s", s_id, gps.get_info(), internalT, externalT, battery);
-  //snprintf(data, DATASIZE, "$$SDEAN,%d,%s,%s", s_id, gps.get_info(), battery);
   //print this to the screen and the ram
   Serial.println(data);
   Serial.println(freeRam());
