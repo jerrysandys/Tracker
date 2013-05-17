@@ -4,7 +4,6 @@
 //Notes:    Thanks goes to all the existing UKHAS enthusiasts who helped with providing example code for others to use.
 //          Thanks also to the guys on the UKHAS #highaltitude irc channel for their invaluable help.
 
-//Github test
 //We need SoftwareSerial port as we are using the hardware port for GPS
 #include <SoftwareSerial.h>
 //This is a modifed version of the TinyGPS libaray for UBlox GPS chips
@@ -14,6 +13,9 @@
 //Include our separate code for ease of reading
 #include "rtty.h"
 #include "gps.h"
+//Include temperature
+#include <OneWire.h>
+#include <DallasTemperature.h>
 
 //Setup pins
 #define GPSRX 2
@@ -21,12 +23,15 @@
 #define NTX2 3
 #define REDLED 4
 #define GREENLED 5
+#define TEMP 14
 //Character buffer for transmission
 #define DATASIZE 128
 char data[DATASIZE];
 //Character buffer for battery voltage
 #define BUFSIZE 16
 char battery[BUFSIZE];
+char internalT[BUFSIZE];
+char externalT[BUFSIZE];
 //s_id as sentence id to have a unique number for each transmission
 uint16_t s_id = 0;
 //Select pin for SD card write
@@ -39,6 +44,11 @@ boolean sdWrite = true;
 RTTY rtty(NTX2, REDLED);
 GPS gps(GPSRX, GPSTX, GREENLED);
 SdFat sd;
+OneWire oneWire(TEMP);
+DallasTemperature sensors(&oneWire);
+
+DeviceAddress internalTemp = {0x28, 0xCC, 0x5C, 0x9D, 0x04, 0x00, 0x00, 0xAA};
+DeviceAddress externalTemp = {0x28, 0xAE, 0x2F, 0xAA, 0x04, 0x00, 0x00, 0xEA};
 //*************************************************************************************
 //
 //setup()
@@ -59,9 +69,15 @@ void setup() {
 
   //Light up both LEDs to indicate that we have a go situation!
   digitalWrite(GREENLED, HIGH);
-  digitalWrite(REDLED, HIGH);  
+  digitalWrite(REDLED, HIGH);
   //Initialise GPS
   gps.start();
+  
+  //Initialise Temperature Sensors
+  sensors.begin();
+  sensors.setResolution(internalTemp, 10);
+  sensors.setResolution(externalTemp, 10);
+  
   //Initialise SD card
   //Try and write to the SD card - if we can then fine, if we can't then set sdWrite to false
   //so we don't try to write to it later
@@ -79,7 +95,7 @@ void setup() {
   }
   digitalWrite(GREENLED, LOW);
   digitalWrite(REDLED, LOW);  
-  Serial.println(F("GPS and SD initialised"));  
+  Serial.println(F("GPS and SD initialised"));
 }
 
 //*************************************************************************************
@@ -92,6 +108,9 @@ void loop() {
 
   //Get battery voltage
   dtostrf(get_voltage()/1000,0,1, battery);
+  //Get
+  dtostrf(sensors.getTempC(internalTemp),0,1,internalT);
+  dtostrf(sensors.getTempC(externalTemp),0,1,externalT);
 
   //How much ram do we have
   Serial.println(freeRam());  
@@ -99,7 +118,7 @@ void loop() {
   //$$callsign,sentence_id,time,latitude,longitude,altitude,fix,ascentrate,satellites,batteryvoltage*CHECKSUM\n
   
   //Call gps.get_info and, along with the s_id and battery, put it altogether into the string called 'data'
-  snprintf(data, DATASIZE, "$$SDEAN,%d,%s,%s", s_id, gps.get_info(), battery);
+  snprintf(data, DATASIZE, "$$SDEAN,%d,%s,%s,%s,%s", s_id, gps.get_info(), battery, internalT, externalT);
   //print this to the screen and the ram
   Serial.println(data);
   Serial.println(freeRam());
@@ -110,7 +129,6 @@ void loop() {
   Serial.println(freeRam());
   //increment the id next time.
   s_id++;
-  delay(500);
 }
 
 //*************************************************************************************
