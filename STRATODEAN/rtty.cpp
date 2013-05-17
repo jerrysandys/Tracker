@@ -15,7 +15,7 @@ RTTY::RTTY(uint8_t pin, uint8_t led_pin) {
 void RTTY::send(char *data) {
 
   char c;
-  char chksum_str[6];
+  char chksum_str[7];
 
   //Call checksum routine
   unsigned int CHECKSUM = crc16_chksum(data);
@@ -29,7 +29,7 @@ void RTTY::send(char *data) {
     send_byte(c);
     c = *data++;
   }
-
+  
 }
 void RTTY::send_byte(char c) {
   uint8_t i;
@@ -86,5 +86,6 @@ uint16_t RTTY::crc16_chksum(char *str)
   }
   return crc;
 }
+
 
 
