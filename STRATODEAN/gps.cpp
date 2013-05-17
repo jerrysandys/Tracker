@@ -148,7 +148,7 @@ boolean GPS::poll() {
   //This is the special command that gets the information from the GPS
   //Send this to the GPS and wait for response
   println(F("$PUBX,00*33"));
-  delay(1500);
+  //delay(1500);
   unsigned long starttime = millis();
 
   //Continue to read from gps hardware port
