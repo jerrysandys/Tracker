@@ -23,7 +23,7 @@
 #define NTX2 3
 #define REDLED 4
 #define GREENLED 5
-#define TEMP 14
+#define TEMP 7
 //Character buffer for transmission
 #define DATASIZE 128
 char data[DATASIZE];
@@ -63,6 +63,12 @@ void setup() {
 
   //Intialise our hardware serial port to talk to the GPS at 9600 baud. 
   Serial.begin(9600);
+  
+  //Initialise Temperature Sensors
+  sensors.begin();
+  sensors.setResolution(internalTemp, 10);
+  sensors.setResolution(externalTemp, 10);
+  
   Serial.println(F("STRATODEAN Payload Tracker, initialising......"));
   //Check how much RAM we have
   Serial.println(freeRam());
@@ -72,11 +78,7 @@ void setup() {
   digitalWrite(REDLED, HIGH);
   //Initialise GPS
   gps.start();
-  
-  //Initialise Temperature Sensors
-  sensors.begin();
-  sensors.setResolution(internalTemp, 10);
-  sensors.setResolution(externalTemp, 10);
+
   
   //Initialise SD card
   //Try and write to the SD card - if we can then fine, if we can't then set sdWrite to false
@@ -108,9 +110,10 @@ void loop() {
 
   //Get battery voltage
   dtostrf(get_voltage()/1000,0,1, battery);
-  //Get
-  dtostrf(sensors.getTempC(internalTemp),0,1,internalT);
-  dtostrf(sensors.getTempC(externalTemp),0,1,externalT);
+  //Get temperature
+  sensors.requestTemperatures();
+  dtostrf(sensors.getTempC(internalTemp),0,2,internalT);
+  dtostrf(sensors.getTempC(externalTemp),0,2,externalT);
 
   //How much ram do we have
   Serial.println(freeRam());  
@@ -118,7 +121,7 @@ void loop() {
   //$$callsign,sentence_id,time,latitude,longitude,altitude,fix,ascentrate,satellites,batteryvoltage*CHECKSUM\n
   
   //Call gps.get_info and, along with the s_id and battery, put it altogether into the string called 'data'
-  snprintf(data, DATASIZE, "$$SDEAN,%d,%s,%s,%s,%s", s_id, gps.get_info(), battery, internalT, externalT);
+  snprintf(data, DATASIZE, "$$SDEAN,%d,%s,%s,%s,%s", s_id, gps.get_info(), internalT, externalT, battery);
   //print this to the screen and the ram
   Serial.println(data);
   Serial.println(freeRam());
@@ -192,4 +195,3 @@ void flashLEDs() {
   digitalWrite(GREENLED, LOW);
   digitalWrite(REDLED, LOW);  
 }
-
