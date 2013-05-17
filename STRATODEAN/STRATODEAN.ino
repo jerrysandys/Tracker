@@ -63,12 +63,7 @@ void setup() {
 
   //Intialise our hardware serial port to talk to the GPS at 9600 baud. 
   Serial.begin(9600);
-  
-  //Initialise Temperature Sensors
-  sensors.begin();
-  sensors.setResolution(internalTemp, 10);
-  sensors.setResolution(externalTemp, 10);
-  
+ 
   Serial.println(F("STRATODEAN Payload Tracker, initialising......"));
   //Check how much RAM we have
   Serial.println(freeRam());
@@ -79,7 +74,12 @@ void setup() {
   //Initialise GPS
   gps.start();
 
-  
+  //Initialise Temperature Sensors
+  sensors.begin();
+  sensors.setResolution(internalTemp, 10);
+  sensors.setResolution(externalTemp, 10);
+
+   Serial.println(freeRam());
   //Initialise SD card
   //Try and write to the SD card - if we can then fine, if we can't then set sdWrite to false
   //so we don't try to write to it later
